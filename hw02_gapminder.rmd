@@ -1,0 +1,181 @@
+---
+title: "STAT 545A Homework 2"
+author: Junbin ZHANG
+date: Sept 17, 2018
+output: github_document
+---
+
+# Bring rectangular data in
+```{r}
+## load gapminder
+library(gapminder)
+## load tidyverse
+library(tidyverse)
+```
+
+# Smell test the data
+
+## Is it a data.frame, a matrix, a vector, a list?
+## What is its class?
+
+```{r}
+## show the class of the data
+class(gapminder)
+```
+
+It is a data.frame.
+It belongs to three classes: tbl_df, tbl, and data.frame
+
+## How many variables/columns
+
+```{r}
+## show the number of columns
+ncol(gapminder)
+```
+
+## How many rows/observations?
+
+```{r}
+## show the number of rows
+nrow(gapminder)
+```
+
+## Can you get these facts about "extent" or "size" in more than one way? Can you imagine different functions being useful in different contexts?
+
+**For data.frame only**, we can also use `length(gapminder)` to replace `ncol(gapminder)`. We can also use `dim(gapminder)` to get the numbers of columns and rows at the same time. To be more complicated, `str(gapminder)` and `summary(gapminder)` are also possible to (indirectly) show the numbers of columns and rows
+
+However, for `length()`, as an example, `length()` and `ncol()` will return different things if the input is a matrix. For the others, sometimes it may not be necessary to get so much redundant information.
+
+## What data type is each variable?
+```{r}
+## show the structure of gapminder, which contains data type of each variable
+str(gapminder)
+```
+
+There are six variables:
+
+- "country" as Factor
+- "continent" as Factor
+- "year" as int (Integer)
+- "lifeExp" as num (double)
+- "pop" as int (Integer)
+- "gdpPercap" as num (double)
+
+# Explore individual variables
+
+## Explore categorical variable
+
+There are two categorical variabels: "country" and "continent". Let's explore "country" as a categorical variable.
+
+### What are possible values (or range, whichever is appropriate) of each variable?
+
+```{r}
+## print unique values in "country"
+unique(gapminder$country)
+```
+
+It prints out there are 142 unique values in this column, which matches the fact that there are 142 levels in "country"
+
+### What values are typical? What's the spread? What's the distribution? Etc., tailored to the variable at hand.
+
+```{r}
+## print the most frequent value(s)
+tt <- table(gapminder$country)
+names(tt[tt==max(tt)])
+```
+
+```{r}
+## print the frequency of each unique value
+summary(gapminder$country)
+```
+
+It seems like every unique value in "country" has the same frequency, which is 12.
+
+```{r}
+## print the barplot of each unique value
+barplot(table(gapminder$country))
+```
+
+It is not surprise that when we plot the frequency of every unique value in "country", each bar appears to be the same.
+
+Therefore, we explore "continent" to check if the R code is correct.
+
+```{r}
+## print the most frequent value(s)
+tt <- table(gapminder$continent)
+names(tt[tt==max(tt)])
+```
+
+```{r}
+## print the frequency of each unique value
+summary(gapminder$continent)
+```
+
+So the most frequent (typical) value in "continent" is "Africa".
+
+```{r}
+## print the barplot of each unique value
+barplot(table(gapminder$continent))
+```
+
+## Explore quantitative variable
+
+There are four quantitative variabels: "year", "lifeExp", "pop" and "gdpPercap". Let's explore "year" as a quantitative variable.
+
+### What are possible values (or range, whichever is appropriate) of each variable?
+
+```{r}
+## print the range of "year"
+range(gapminder$year)
+```
+
+### What values are typical? What's the spread? What's the distribution? Etc., tailored to the variable at hand.
+
+```{r}
+## print the most frequent value(s)
+tt <- table(gapminder$year)
+names(tt[tt==max(tt)])
+```
+
+```{r}
+## print the frequency of each unique value
+table(gapminder$year)
+```
+
+It seems like every unique value in "year" has the same frequency, which is 142.
+
+```{r}
+## print the barplot of each unique value
+barplot(table(gapminder$year))
+```
+
+Again, each bar in the barplot is the same.
+
+Therefore, we explore "lifeExp" to check if the R code is correct.
+
+```{r}
+## print the most frequent value(s)
+tt <- table(gapminder$lifeExp)
+names(tt[tt==max(tt)])
+```
+
+```{r}
+## print the frequency of each unique value
+table(gapminder$lifeExp)
+```
+
+```{r}
+## print the frequency of the most frequent value
+tt[tt==max(tt)]
+```
+
+The most frequent value is 69.39, with 4 appearances.
+
+```{r}
+## print the barplot of each unique value
+barplot(table(gapminder$lifeExp))
+```
+
+# Explore various plot types
+
+[TBC]
