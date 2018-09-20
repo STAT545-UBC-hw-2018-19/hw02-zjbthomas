@@ -871,4 +871,2009 @@ barplot(table(gapminder$lifeExp))
 
 # Explore various plot types
 
-\[TBC\]
+# Use `filter()`, `select()` and `%>`
+
+I would like to combine there two sections together to print some plots
+using piping and dplyr functions.
+
+## A scatterplot of two quantitative variables.
+
+Let’s show the population (in log) in different years.
+
+``` r
+sp <- gapminder %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a scatterplot, and add transparancy
+  geom_point(alpha=0.1)
+# display scatterplot
+sp
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-21-1.png)<!-- -->
+
+Let’s also do a version with jitter.
+
+``` r
+gapminder %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a Jitter plot
+  geom_jitter()
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-22-1.png)<!-- -->
+
+We then use facetting to show the trends in different continents. To
+make it clearer, we apply colors on different continents.
+
+``` r
+sp +
+  # show colors
+  aes(color=continent) + 
+  # facetting by continent
+  facet_wrap(~ continent)
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-23-1.png)<!-- -->
+
+Let’s select a single country (e.g. Canada), and show its trend of
+population throughout the years.
+
+``` r
+gapminder %>% 
+  # filter country as Canada
+  filter(country == "Canada") %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a scatterplot
+  geom_point() +
+  # try to draw a regression curve
+  geom_smooth(method="lm", se=FALSE)
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-24-1.png)<!-- -->
+
+Let’s see the difference of regression curve compared to line plot.
+
+``` r
+gapminder %>% 
+  # filter country as Canada
+  filter(country == "Canada") %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a lineplot with points
+  geom_point() +
+  geom_line()
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-25-1.png)<!-- -->
+
+The line plot only connects all data points instead of find out the
+relationship.
+
+## A plot of one quantitative variable. Maybe a histogram or densityplot or frequency polygon.
+
+In this section, we use “lifeExp” as the quantitative variable under
+analysis.
+
+### A histogram of “lifeExp”
+
+``` r
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a histogram
+  geom_histogram(bins=50, color="black")
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-26-1.png)<!-- -->
+
+### A densityplot of “lifeExp”
+
+``` r
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a densityplot
+  geom_density(fill="grey")
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-27-1.png)<!-- -->
+
+Let’s combine histogram and densityplot together
+
+``` r
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a histogram, also scale it similar to densityplot
+  geom_histogram(bins=50, aes(y=..density..), color="black") +
+  # make it a densityplot
+  geom_density()
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-28-1.png)<!-- -->
+
+### A frequency polygon of “lifeExp”
+
+``` r
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a frequency polygon
+  geom_freqpoly(bins=30)
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-29-1.png)<!-- -->
+
+## A plot of one quantitative variable and one categorical. Maybe boxplots for several continents or countries.
+
+Let’s show a boxplot for GDP in different continents. Though a
+`select()` does not affect the result, we use it just for a
+demonstration.
+
+``` r
+gapminder %>% 
+  # select gdpPercap and continent columns
+  select(gdpPercap, continent) %>% 
+  # continent as x axis and gdpPercap as y axis
+  ggplot(aes(x=continent, y=gdpPercap)) +
+  # scale y by log10, so the result is better
+  scale_y_log10() +
+  # make it a boxplot
+  geom_boxplot()
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-30-1.png)<!-- -->
+
+Let’s also make a violin plot.
+
+``` r
+gapminder %>% 
+  # select gdpPercap and continent columns
+  select(gdpPercap, continent) %>% 
+  # continent as x axis and gdpPercap as y axis
+  ggplot(aes(x=continent, y=gdpPercap)) +
+  # scale y by log10, so the result is better
+  scale_y_log10() +
+  # make it a violin plot
+  geom_violin(fill="grey")
+```
+
+![](hw02_gapminder_files/figure-gfm/unnamed-chunk-31-1.png)<!-- -->
+
+# But I want to do more\!
+
+## Evaluate this code and describe the result.
+
+Let’s run the code first to see what happens.
+
+``` r
+filter(gapminder, country == c("Rwanda", "Afghanistan"))
+```
+
+    ## # A tibble: 12 x 6
+    ##    country     continent  year lifeExp      pop gdpPercap
+    ##    <fct>       <fct>     <int>   <dbl>    <int>     <dbl>
+    ##  1 Afghanistan Asia       1957    30.3  9240934      821.
+    ##  2 Afghanistan Asia       1967    34.0 11537966      836.
+    ##  3 Afghanistan Asia       1977    38.4 14880372      786.
+    ##  4 Afghanistan Asia       1987    40.8 13867957      852.
+    ##  5 Afghanistan Asia       1997    41.8 22227415      635.
+    ##  6 Afghanistan Asia       2007    43.8 31889923      975.
+    ##  7 Rwanda      Africa     1952    40    2534927      493.
+    ##  8 Rwanda      Africa     1962    43    3051242      597.
+    ##  9 Rwanda      Africa     1972    44.6  3992121      591.
+    ## 10 Rwanda      Africa     1982    46.2  5507565      882.
+    ## 11 Rwanda      Africa     1992    23.6  7290203      737.
+    ## 12 Rwanda      Africa     2002    43.4  7852401      786.
+
+Here is a right version, and let’s make a comparison.
+
+``` r
+filter(gapminder, country %in% c("Rwanda", "Afghanistan"))
+```
+
+    ## # A tibble: 24 x 6
+    ##    country     continent  year lifeExp      pop gdpPercap
+    ##    <fct>       <fct>     <int>   <dbl>    <int>     <dbl>
+    ##  1 Afghanistan Asia       1952    28.8  8425333      779.
+    ##  2 Afghanistan Asia       1957    30.3  9240934      821.
+    ##  3 Afghanistan Asia       1962    32.0 10267083      853.
+    ##  4 Afghanistan Asia       1967    34.0 11537966      836.
+    ##  5 Afghanistan Asia       1972    36.1 13079460      740.
+    ##  6 Afghanistan Asia       1977    38.4 14880372      786.
+    ##  7 Afghanistan Asia       1982    39.9 12881816      978.
+    ##  8 Afghanistan Asia       1987    40.8 13867957      852.
+    ##  9 Afghanistan Asia       1992    41.7 16317921      649.
+    ## 10 Afghanistan Asia       1997    41.8 22227415      635.
+    ## # ... with 14 more rows
+
+The second one shows more results. That is because using `==`, country
+needs to be strictly equaled to a list with two string “Rwanda” and
+“Afghanistan”, which does not match the data frame and leads to wrong
+results. While using `%in%`, country only needs to be either one of the
+two strings, and the results are complete.
+
+## Present numerical tables
+
+As a bonus, let’s use `knitr` and `kableExtra` to show some numerical
+tables.
+
+``` r
+# load knitr adn kableExtra, assuming they are already installed by install.packages("kableExtra")
+library(knitr)
+library(kableExtra)
+```
+
+We only filter some of the data to show as a table.
+
+``` r
+gapminder %>%
+  # filter some values to show
+  filter(continent == "Americas", year >= 2000) %>%
+  # unselect continent (since there is only one continent). Need to do this step after filtering
+  select(-continent) %>% 
+  # add some styles
+  mutate(
+    pop = cell_spec(pop, color=ifelse(pop>=100000000, "red", "blue")),
+    gdpPercap = cell_spec(gdpPercap, color=ifelse(gdpPercap < 10000, "red", "green"))
+  ) %>% 
+  # create a table
+  kable()
+```
+
+<table>
+
+<thead>
+
+<tr>
+
+<th style="text-align:left;">
+
+country
+
+</th>
+
+<th style="text-align:right;">
+
+year
+
+</th>
+
+<th style="text-align:right;">
+
+lifeExp
+
+</th>
+
+<th style="text-align:left;">
+
+pop
+
+</th>
+
+<th style="text-align:left;">
+
+gdpPercap
+
+</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+<tr>
+
+<td style="text-align:left;">
+
+Argentina
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+74.340
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>38331121\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>8797.640716\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Argentina
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+75.320
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>40301927\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>12779.37964\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Bolivia
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+63.883
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>8445134\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>3413.26269\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Bolivia
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+65.554
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>9119152\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>3822.137084\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Brazil
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+71.006
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>179914212\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>8131.212843\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Brazil
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+72.390
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>190010647\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>9065.800825\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Canada
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+79.770
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>31902268\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>33328.96507\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Canada
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+80.653
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>33390141\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>36319.23501\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Chile
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+77.860
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>15497046\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>10778.78385\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Chile
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+78.553
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>16284741\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>13171.63885\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colombia
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+71.682
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>41008227\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>5755.259962\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Colombia
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+72.889
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>44227550\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>7006.580419\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Costa Rica
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+78.123
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>3834934\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>7723.447195\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Costa Rica
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+78.782
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>4133884\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>9645.06142\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Cuba
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+77.158
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>11226999\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>6340.646683\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Cuba
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+78.273
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>11416987\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>8948.102923\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Dominican Republic
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+70.847
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>8650322\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>4563.808154\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Dominican Republic
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+72.235
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>9319622\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>6025.374752\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Ecuador
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+74.173
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>12921234\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>5773.044512\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Ecuador
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+74.994
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>13755680\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>6873.262326\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+El Salvador
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+70.734
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>6353681\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>5351.568666\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+El Salvador
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+71.878
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>6939688\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>5728.353514\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Guatemala
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+68.978
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>11178650\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>4858.347495\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Guatemala
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+70.259
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>12572928\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>5186.050003\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Haiti
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+58.137
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>7607651\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>1270.364932\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Haiti
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+60.916
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>8502814\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>1201.637154\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Honduras
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+68.565
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>6677328\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>3099.72866\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Honduras
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+70.198
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>7483763\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>3548.330846\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Jamaica
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+72.047
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>2664659\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>6994.774861\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Jamaica
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+72.567
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>2780132\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>7320.880262\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Mexico
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+74.902
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>102479927\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>10742.44053\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Mexico
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+76.195
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>108700891\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>11977.57496\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Nicaragua
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+70.836
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>5146848\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>2474.548819\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Nicaragua
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+72.899
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>5675356\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>2749.320965\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Panama
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+74.712
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>2990875\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>7356.031934\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Panama
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+75.537
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>3242173\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>9809.185636\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Paraguay
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+70.755
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>5884491\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>3783.674243\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Paraguay
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+71.752
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>6667147\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>4172.838464\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Peru
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+69.906
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>26769436\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>5909.020073\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Peru
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+71.421
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>28674757\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>7408.905561\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Puerto Rico
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+77.778
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>3859606\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>18855.60618\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Puerto Rico
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+78.746
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>3942491\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>19328.70901\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Trinidad and Tobago
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+68.976
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>1101832\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>11460.60023\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Trinidad and Tobago
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+69.819
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>1056608\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>18008.50924\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+United States
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+77.310
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>287675526\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>39097.09955\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+United States
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+78.242
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>301139947\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>42951.65309\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Uruguay
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+75.307
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>3363085\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>7727.002004\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Uruguay
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+76.384
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>3447496\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>10611.46299\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Venezuela
+
+</td>
+
+<td style="text-align:right;">
+
+2002
+
+</td>
+
+<td style="text-align:right;">
+
+72.766
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>24287670\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: red;" \>8605.047831\</span\>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="text-align:left;">
+
+Venezuela
+
+</td>
+
+<td style="text-align:right;">
+
+2007
+
+</td>
+
+<td style="text-align:right;">
+
+73.747
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: blue;" \>26084662\</span\>
+
+</td>
+
+<td style="text-align:left;">
+
+\<span style=" color: green;" \>11415.80569\</span\>
+
+</td>
+
+</tr>
+
+</tbody>
+
+</table>

@@ -177,5 +177,199 @@ barplot(table(gapminder$lifeExp))
 ```
 
 # Explore various plot types
+# Use `filter()`, `select()` and `%>`
 
-[TBC]
+I would like to combine there two sections together to print some plots using piping and dplyr functions.
+
+## A scatterplot of two quantitative variables.
+
+Let's show the population (in log) in different years.
+
+```{r}
+sp <- gapminder %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a scatterplot, and add transparancy
+  geom_point(alpha=0.1)
+# display scatterplot
+sp
+```
+
+Let's also do a version with jitter.
+
+```{r}
+gapminder %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a Jitter plot
+  geom_jitter()
+```
+
+
+We then use facetting to show the trends in different continents. To make it clearer, we apply colors on different continents.
+
+```{r}
+sp +
+  # show colors
+  aes(color=continent) + 
+  # facetting by continent
+  facet_wrap(~ continent)
+```
+
+Let's select a single country (e.g. Canada), and show its trend of population throughout the years.
+
+```{r}
+gapminder %>% 
+  # filter country as Canada
+  filter(country == "Canada") %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a scatterplot
+  geom_point() +
+  # try to draw a regression curve
+  geom_smooth(method="lm", se=FALSE)
+```
+
+
+Let's see the difference of regression curve compared to line plot.
+
+
+```{r}
+gapminder %>% 
+  # filter country as Canada
+  filter(country == "Canada") %>% 
+  # year as x axis and pop as y axis
+  ggplot(aes(x=year, y=pop)) +
+  # scale y axis by log10
+  scale_y_log10() +
+  # make it a lineplot with points
+  geom_point() +
+  geom_line()
+```
+
+The line plot only connects all data points instead of find out the relationship.
+
+## A plot of one quantitative variable. Maybe a histogram or densityplot or frequency polygon.
+
+In this section, we use "lifeExp" as the quantitative variable under analysis.
+
+### A histogram of "lifeExp"
+
+```{r}
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a histogram
+  geom_histogram(bins=50, color="black")
+```
+
+### A densityplot of "lifeExp"
+
+```{r}
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a densityplot
+  geom_density(fill="grey")
+```
+
+Let's combine histogram and densityplot together
+```{r}
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a histogram, also scale it similar to densityplot
+  geom_histogram(bins=50, aes(y=..density..), color="black") +
+  # make it a densityplot
+  geom_density()
+```
+
+### A frequency polygon of "lifeExp"
+```{r}
+gapminder %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a frequency polygon
+  geom_freqpoly(bins=30)
+```
+
+## A plot of one quantitative variable and one categorical. Maybe boxplots for several continents or countries.
+
+Let's show a boxplot for GDP in different continents. Though a `select()` does not affect the result, we use it just for a demonstration.
+
+```{r}
+gapminder %>% 
+  # select gdpPercap and continent columns
+  select(gdpPercap, continent) %>% 
+  # continent as x axis and gdpPercap as y axis
+  ggplot(aes(x=continent, y=gdpPercap)) +
+  # scale y by log10, so the result is better
+  scale_y_log10() +
+  # make it a boxplot
+  geom_boxplot()
+```
+
+Let's also make a violin plot.
+
+```{r}
+gapminder %>% 
+  # select gdpPercap and continent columns
+  select(gdpPercap, continent) %>% 
+  # continent as x axis and gdpPercap as y axis
+  ggplot(aes(x=continent, y=gdpPercap)) +
+  # scale y by log10, so the result is better
+  scale_y_log10() +
+  # make it a violin plot
+  geom_violin(fill="grey")
+```
+
+# But I want to do more!
+
+## Evaluate this code and describe the result.
+
+Let's run the code first to see what happens.
+```{r}
+filter(gapminder, country == c("Rwanda", "Afghanistan"))
+```
+
+Here is a right version, and let's make a comparison.
+```{r}
+filter(gapminder, country %in% c("Rwanda", "Afghanistan"))
+```
+
+The second one shows more results. That is because using `==`, country needs to be strictly equaled to a list with two string "Rwanda" and "Afghanistan", which does not match the data frame and leads to wrong results. While using `%in%`, country only needs to be either one of the two strings, and the results are complete.
+
+## Present numerical tables
+
+As a bonus, let's use `knitr` and `kableExtra` to show some numerical tables.
+
+```{r}
+# load knitr adn kableExtra, assuming they are already installed by install.packages("kableExtra")
+library(knitr)
+library(kableExtra)
+```
+
+We only filter some of the data to show as a table.
+
+```{r}
+gapminder %>%
+  # filter some values to show
+  filter(continent == "Americas", year >= 2000) %>%
+  # unselect continent (since there is only one continent). Need to do this step after filtering
+  select(-continent) %>% 
+  # add some styles
+  mutate(
+    pop = cell_spec(pop, color=ifelse(pop>=100000000, "red", "blue")),
+    gdpPercap = cell_spec(gdpPercap, color=ifelse(gdpPercap < 10000, "red", "green"))
+  ) %>% 
+  # create a table
+  kable()
+```
+
+
