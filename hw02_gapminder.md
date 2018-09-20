@@ -1164,7 +1164,7 @@ gapminder %>%
     ## 10 Afghanistan Asia       1997      635.           1.62        22.2 
     ## # ... with 1,694 more rows
 
-### `summarise()` and `group_by`
+### `summarise()` and `group_by()`
 
 We can use `summarise()` to calculate statistical summaries like mean
 values. We can also use `group_by()` to group same variables like
