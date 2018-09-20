@@ -345,31 +345,47 @@ filter(gapminder, country %in% c("Rwanda", "Afghanistan"))
 
 The second one shows more results. That is because using `==`, country needs to be strictly equaled to a list with two string "Rwanda" and "Afghanistan", which does not match the data frame and leads to wrong results. While using `%in%`, country only needs to be either one of the two strings, and the results are complete.
 
-## Present numerical tables
+## Use more of the dplyr functions for operating on a single table.
 
-As a bonus, let's use `knitr` and `kableExtra` to show some numerical tables.
+### `arrange()`
+
+We can use `arrange()` to re-order rows.
 
 ```{r}
-# load knitr adn kableExtra, assuming they are already installed by install.packages("kableExtra")
-library(knitr)
-library(kableExtra)
+gapminder %>% 
+  # re-order rows, first by continent, then country, then year
+  arrange(continent, country, year) %>% 
+  # re-order columns to first show continent then country
+  select(continent, country, everything())
 ```
 
-We only filter some of the data to show as a table.
+### `mutate()`
+
+We can use `mutate()` to create new columns. For example, we can calulate log10 of "lifeExp", and show "pop" in million.
 
 ```{r}
-gapminder %>%
-  # filter some values to show
-  filter(continent == "Americas", year >= 2000) %>%
-  # unselect continent (since there is only one continent). Need to do this step after filtering
-  select(-continent) %>% 
-  # add some styles
+gapminder %>% 
+  # mutate lifeExp to lifeExpInLog10 and pop to popInMillion
   mutate(
-    pop = cell_spec(pop, color=ifelse(pop>=100000000, "red", "blue")),
-    gdpPercap = cell_spec(gdpPercap, color=ifelse(gdpPercap < 10000, "red", "green"))
+    lifeExpInLog10 = log10(lifeExp),
+    popInMillion = pop / 1000000
   ) %>% 
-  # create a table
-  kable()
+  # delete original columns
+  select(-lifeExp, -pop)
 ```
 
+### `summarise()` and `group_by`
+
+We can use `summarise()` to calculate statistical summaries like mean values. We can also use `group_by()` to group same variables like continents.
+
+```{r}
+gapminder %>% 
+  group_by(continent) %>% 
+  summarize(
+    avg_gdpPercap = mean(gdpPercap),
+    max_lifeExp = max(lifeExp),
+    min_pop = min(pop),
+    total = n()
+  )
+```
 
