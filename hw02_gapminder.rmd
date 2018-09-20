@@ -374,7 +374,7 @@ gapminder %>%
   select(-lifeExp, -pop)
 ```
 
-### `summarise()` and `group_by`
+### `summarise()` and `group_by()`
 
 We can use `summarise()` to calculate statistical summaries like mean values. We can also use `group_by()` to group same variables like continents.
 
