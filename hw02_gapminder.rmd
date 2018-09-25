@@ -88,7 +88,8 @@ names(tt[tt==max(tt)])
 
 ```{r}
 ## print the frequency of each unique value
-summary(gapminder$country)
+summary(gapminder$country)  %>% 
+  knitr::kable(col.names=c("frequency"))
 ```
 
 It seems like every unique value in "country" has the same frequency, which is 12.
@@ -110,7 +111,8 @@ names(tt[tt==max(tt)])
 
 ```{r}
 ## print the frequency of each unique value
-summary(gapminder$continent)
+summary(gapminder$continent)  %>% 
+  knitr::kable(col.names=c("frequency"))
 ```
 
 So the most frequent (typical) value in "continent" is "Africa".
@@ -141,7 +143,8 @@ names(tt[tt==max(tt)])
 
 ```{r}
 ## print the frequency of each unique value
-table(gapminder$year)
+table(gapminder$year) %>% 
+  knitr::kable(col.names=c("year", "frequency"))
 ```
 
 It seems like every unique value in "year" has the same frequency, which is 142.
@@ -162,13 +165,9 @@ names(tt[tt==max(tt)])
 ```
 
 ```{r}
-## print the frequency of each unique value
-table(gapminder$lifeExp)
-```
-
-```{r}
 ## print the frequency of the most frequent value
-tt[tt==max(tt)]
+tt[tt==max(tt)] %>% 
+  knitr::kable(col.names=c("frequency"))
 ```
 
 The most frequent value is 69.39, with 4 appearances.
@@ -179,7 +178,7 @@ barplot(table(gapminder$lifeExp))
 ```
 
 # Explore various plot types
-# Use `filter()`, `select()` and `%>`
+# Use `filter()`, `select()` and `%>%`
 
 I would like to combine there two sections together to print some plots using piping and dplyr functions.
 
@@ -208,7 +207,11 @@ gapminder %>%
   # scale y axis by log10
   scale_y_log10() +
   # make it a Jitter plot
-  geom_jitter()
+  geom_jitter() +
+  # make different size according to pop, and add color for different continents
+  aes(size=pop, color=continent) +
+  # scale the size so it is more readable
+  scale_size_area()
 ```
 
 
@@ -267,9 +270,24 @@ In this section, we use "lifeExp" as the quantitative variable under analysis.
 gapminder %>% 
   # lifeExp as x axis
   ggplot(aes(x=lifeExp)) +
-  # make it a histogram
-  geom_histogram(bins=50, color="black")
+  # make it a histogram (we fill it with color by continents, and this is an example of overplotting)
+  geom_histogram(bins=50, aes(fill=continent))
 ```
+
+Let's try to show it for different continents and years.
+
+```{r}
+gapminder %>%
+  # to make it look better, remove Oceania and filter only a few years
+  filter(continent!="Oceania", year>=1990) %>% 
+  # lifeExp as x axis
+  ggplot(aes(x=lifeExp)) +
+  # make it a histogram
+  geom_histogram(bins=50) +
+  # facetting
+  facet_grid(year ~ continent, scales="free_x")
+```
+
 
 ### A densityplot of "lifeExp"
 
@@ -328,7 +346,7 @@ gapminder %>%
   # scale y by log10, so the result is better
   scale_y_log10() +
   # make it a violin plot
-  geom_violin(fill="grey")
+  geom_violin(color="red", fill="red", alpha=0.1)
 ```
 
 # But I want to do more!
@@ -337,12 +355,14 @@ gapminder %>%
 
 Let's run the code first to see what happens.
 ```{r}
-filter(gapminder, country == c("Rwanda", "Afghanistan"))
+filter(gapminder, country == c("Rwanda", "Afghanistan")) %>% 
+  knitr::kable()
 ```
 
 Here is a right version, and let's make a comparison.
 ```{r}
-filter(gapminder, country %in% c("Rwanda", "Afghanistan"))
+filter(gapminder, country %in% c("Rwanda", "Afghanistan"))  %>% 
+  knitr::kable()
 ```
 
 The second one shows more results. That is because using `==`, country needs to be strictly equaled to a list with two string "Rwanda" and "Afghanistan", which does not match the data frame and leads to wrong results. While using `%in%`, country only needs to be either one of the two strings, and the results are complete.
@@ -355,10 +375,14 @@ We can use `arrange()` to re-order rows.
 
 ```{r}
 gapminder %>% 
+  # filter some records to make the resultant table look better
+  filter(pop >= 200000000) %>% 
   # re-order rows, first by continent, then country, then year
   arrange(continent, country, year) %>% 
   # re-order columns to first show continent then country
-  select(continent, country, everything())
+  select(continent, country, everything())  %>% 
+  # display table
+  knitr::kable()
 ```
 
 ### `mutate()`
@@ -367,13 +391,17 @@ We can use `mutate()` to create new columns. For example, we can calulate log10 
 
 ```{r}
 gapminder %>% 
+  # filter some records to make the resultant table look better
+  filter(continent == "Oceania") %>% 
   # mutate lifeExp to lifeExpInLog10 and pop to popInMillion
   mutate(
     lifeExpInLog10 = log10(lifeExp),
     popInMillion = pop / 1000000
   ) %>% 
   # delete original columns
-  select(-lifeExp, -pop)
+  select(-lifeExp, -pop)  %>% 
+  # display table
+  knitr::kable()
 ```
 
 ### `summarise()` and `group_by()`
@@ -382,12 +410,16 @@ We can use `summarise()` to calculate statistical summaries like mean values. We
 
 ```{r}
 gapminder %>% 
+  # group by continent
   group_by(continent) %>% 
+  # calculate summaries
   summarize(
     avg_gdpPercap = mean(gdpPercap),
     max_lifeExp = max(lifeExp),
     min_pop = min(pop),
     total = n()
-  )
+  ) %>%
+  # display table
+  knitr::kable()
 ```
 
