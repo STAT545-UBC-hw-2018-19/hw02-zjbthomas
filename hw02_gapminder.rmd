@@ -3,16 +3,18 @@ title: "STAT 545A Homework 2"
 author: Junbin ZHANG
 date: Sept 17, 2018
 output:
-  github_document:
+  html_document:
+    keep_md: true
     toc: true
+    theme: readable
 ---
 
 # Bring rectangular data in
 ```{r}
 ## load gapminder
-library(gapminder)
+suppressPackageStartupMessages(library(gapminder))
 ## load tidyverse
-library(tidyverse)
+suppressPackageStartupMessages(library(tidyverse))
 ```
 
 # Smell test the data
